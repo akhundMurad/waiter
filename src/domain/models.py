@@ -1,19 +1,21 @@
+import logging
 import uuid
-from typing import Optional
 
+from sqlalchemy.orm import relationship
+
+from adapters import orm
 from domain.exceptions import WrongMenuItemForRestaurant, \
     WrongTableForRestaurant
 from waiter.src.domain.valueobjects import Price, Table
 
 
-class Entity:
-    _id: Optional[uuid.UUID] = None
+def generate_uuid() -> uuid.UUID:
+    return uuid.uuid4()
 
-    @property
-    def id(self) -> uuid.UUID:
-        if self._id is None:
-            self._id = uuid.uuid4()
-        return self._id
+
+class Entity:
+    def __init__(self, id: uuid.UUID = None):
+        self.id = id or generate_uuid()
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Entity):
@@ -25,7 +27,8 @@ class Entity:
 
 
 class Restaurant(Entity):
-    def __init__(self, name: str):
+    def __init__(self, name: str, id: uuid.UUID = None):
+        super().__init__(id)
         self.name = name
         self.tables = set()
         self.menu_items = set()
@@ -52,7 +55,8 @@ class Restaurant(Entity):
 
 class MenuItem(Entity):
     def __init__(self, title: str, description: str,
-                 price: Price, restaurant: Restaurant):
+                 price: Price, restaurant: Restaurant, id: uuid.UUID = None):
+        super().__init__(id)
         self.title = title
         self.description = description
         self.price = price
@@ -69,7 +73,9 @@ class MenuItem(Entity):
 
 
 class Order(Entity):
-    def __init__(self, table: Table, restaurant: Restaurant):
+    def __init__(self, table: Table, restaurant: Restaurant,
+                 id: uuid.UUID = None):
+        super().__init__(id)
         self.table = table
         self.ordered_menu_items = set()
         self.restaurant = restaurant
@@ -89,3 +95,34 @@ class Order(Entity):
         self.total_price = Price(
             value=self.total_price.value + menu_item.price.value
         )
+
+
+logger = logging.getLogger(__name__)
+
+
+def start_mappers():
+    logger.info('Starting mappers...')
+
+    orm.mapper_registry.map_imperatively(Restaurant, orm.restaurant)
+    orm.mapper_registry.map_imperatively(
+        Order,
+        orm.order,
+        properties={
+            'ordered_menu_items': relationship(
+                MenuItem,
+                secondary=orm.order_and_menu_item_association_table,
+                back_populates='orders'
+            )
+        }
+    )
+    orm.mapper_registry.map_imperatively(
+        MenuItem,
+        orm.menu_item,
+        properties={
+            'orders': relationship(
+                Order,
+                secondary=orm.order_and_menu_item_association_table,
+                back_populates='ordered_menu_items'
+            )
+        }
+    )
