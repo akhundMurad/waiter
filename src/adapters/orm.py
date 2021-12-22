@@ -6,12 +6,22 @@ from sqlalchemy.orm import relationship, registry
 
 mapper_registry = registry()
 
+
 restaurant = sa.Table(
     'restaurant',
     mapper_registry.metadata,
     sa.Column('id', sa_psql.UUID(as_uuid=True),
+              primary_key=True, default=uuid.uuid4)
+)
+
+restaurant_table = sa.Table(
+    'restaurant_table',
+    mapper_registry.metadata,
+    sa.Column('id', sa_psql.UUID(as_uuid=True),
               primary_key=True, default=uuid.uuid4),
-    sa.Column('tables', sa_psql.ARRAY(item_type=sa.Integer))
+    sa.Column('index', sa.Integer, nullable=False),
+    sa.Column('restaurant_id', sa.ForeignKey('restaurant.id'),
+              primary_key=True)
 )
 
 menu_item = sa.Table(
@@ -39,7 +49,8 @@ order = sa.Table(
     mapper_registry.metadata,
     sa.Column('id', sa_psql.UUID(as_uuid=True),
               primary_key=True, default=uuid.uuid4),
-    sa.Column('table_index', sa.Integer, nullable=False),
+    sa.Column('table_index',
+              sa.ForeignKey('restaurant_table.index'), nullable=False),
     sa.Column('total_price_value', sa.DECIMAL, nullable=False),
     sa.Column('restaurant_id', sa.ForeignKey('restaurant.id'), nullable=False)
 )

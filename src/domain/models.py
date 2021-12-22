@@ -27,16 +27,17 @@ class Entity:
 
 
 class Restaurant(Entity):
-    def __init__(self, name: str, id: uuid.UUID = None):
+    def __init__(self, name: str, id: uuid.UUID = None,
+                 tables=None, menu_items=None):
         super().__init__(id)
         self.name = name
-        self.tables = set()
-        self.menu_items = set()
+        self.tables = tables or list()
+        self.menu_items = menu_items or list()
 
     def add_table(self):
         previous_table_index = self.get_previous_table_index()
-        table = Table(index=previous_table_index + 1)
-        self.tables.add(table)
+        table = Table(index=previous_table_index + 1, restaurant=self)
+        self.tables.append(table)
 
     def get_previous_table_index(self) -> int:
         try:
@@ -49,7 +50,7 @@ class Restaurant(Entity):
                       description: str, price: Price) -> "MenuItem":
         menu_item = MenuItem(title=title, description=description,
                              price=price, restaurant=self)
-        self.menu_items.add(menu_item)
+        self.menu_items.append(menu_item)
         return menu_item
 
 
@@ -102,11 +103,37 @@ def start_mappers():
     from adapters import orm
 
     logger.info('Starting mappers...')
-    orm.mapper_registry.map_imperatively(Restaurant, orm.restaurant)
+
+    orm.mapper_registry.map_imperatively(
+        Restaurant,
+        orm.restaurant,
+        properties={
+            'orders': relationship(
+                Order,
+                back_populates='restaurant'
+            ),
+            'menu_items': relationship(
+                MenuItem,
+                back_populates='restaurant'
+            ),
+            'tables': relationship(
+                Table,
+                back_populates='restaurant'
+            )
+        }
+    )
+    orm.mapper_registry.map_imperatively(
+        Table,
+        orm.restaurant_table,
+        properties={
+            'restaurant': relationship(Restaurant),
+        }
+    )
     orm.mapper_registry.map_imperatively(
         Order,
         orm.order,
         properties={
+            'restaurant': relationship(Restaurant),
             'ordered_menu_items': relationship(
                 MenuItem,
                 secondary=orm.order_and_menu_item_association_table,
@@ -116,16 +143,14 @@ def start_mappers():
                 Price,
                 orm.order.c.total_price_value
             ),
-            'table': composite(
-                Table,
-                orm.order.c.table_index
-            )
+            'table': relationship(Table)
         }
     )
     orm.mapper_registry.map_imperatively(
         MenuItem,
         orm.menu_item,
         properties={
+            'restaurant': relationship(Restaurant),
             'orders': relationship(
                 Order,
                 secondary=orm.order_and_menu_item_association_table,

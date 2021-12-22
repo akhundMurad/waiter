@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Callable
+from typing import Callable, Any
 
 from waiter.src.domain.exceptions import PriceValueIsLessThanZero, \
     TableIndexIsLessThanZero
@@ -25,7 +25,7 @@ def vo(cls):
     setattr(cls, '__post_init__', __post_init__)
     setattr(cls, '_get_validation_methods', _get_validation_methods)
 
-    return dataclass(cls, init=True, repr=True, frozen=True, order=True)
+    return dataclass(cls, init=True, repr=True, order=True)
 
 
 @vo
@@ -43,9 +43,7 @@ class Price:
 @vo
 class Table:
     index: int
-
-    def __composite_values__(self):
-        return self.index,
+    restaurant: Any
 
     def validate_index(self):
         if self.index < 0:

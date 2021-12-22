@@ -12,18 +12,18 @@ from settings import test
 
 
 @pytest.fixture
-def table():
-    return Table(index=1)
+def restaurant():
+    return models.Restaurant(name='name')
+
+
+@pytest.fixture
+def table(restaurant):
+    return Table(index=1, restaurant=restaurant)
 
 
 @pytest.fixture
 def price():
     return Price(value=Decimal('2.0'))
-
-
-@pytest.fixture
-def restaurant(table):
-    return models.Restaurant(name='name')
 
 
 @pytest.fixture
