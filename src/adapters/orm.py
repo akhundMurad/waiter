@@ -4,8 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as sa_psql
 from sqlalchemy.orm import relationship, registry
 
-metadata = sa.MetaData()
-mapper_registry = registry(metadata=metadata)
+mapper_registry = registry()
 
 restaurant = sa.Table(
     'restaurant',
@@ -22,7 +21,7 @@ menu_item = sa.Table(
               primary_key=True, default=uuid.uuid4),
     sa.Column('title', sa.String(256), nullable=False),
     sa.Column('description', sa.String(1024)),
-    sa.Column('price', sa.Numeric, nullable=False),
+    sa.Column('price_value', sa.DECIMAL, nullable=False),
     sa.Column('restaurant_id', sa.ForeignKey(
         'restaurant.id', ondelete='CASCADE',
     ), nullable=False)
@@ -40,7 +39,7 @@ order = sa.Table(
     mapper_registry.metadata,
     sa.Column('id', sa_psql.UUID(as_uuid=True),
               primary_key=True, default=uuid.uuid4),
-    sa.Column('table', sa.Integer, nullable=False),
-    sa.Column('total_price', sa.Numeric, nullable=False),
+    sa.Column('table_index', sa.Integer, nullable=False),
+    sa.Column('total_price_value', sa.DECIMAL, nullable=False),
     sa.Column('restaurant_id', sa.ForeignKey('restaurant.id'), nullable=False)
 )

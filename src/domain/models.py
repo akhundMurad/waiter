@@ -1,12 +1,12 @@
 import logging
 import uuid
 
-from sqlalchemy.orm import relationship
-
-from adapters import orm
 from domain.exceptions import WrongMenuItemForRestaurant, \
     WrongTableForRestaurant
 from waiter.src.domain.valueobjects import Price, Table
+
+
+logger = logging.getLogger(__name__)
 
 
 def generate_uuid() -> uuid.UUID:
@@ -77,7 +77,7 @@ class Order(Entity):
                  id: uuid.UUID = None):
         super().__init__(id)
         self.table = table
-        self.ordered_menu_items = set()
+        self.ordered_menu_items = list()
         self.restaurant = restaurant
         self.total_price = Price()
 
@@ -89,7 +89,7 @@ class Order(Entity):
 
         self.add_to_total_price(menu_item)
 
-        self.ordered_menu_items.add(menu_item)
+        self.ordered_menu_items.append(menu_item)
 
     def add_to_total_price(self, menu_item: MenuItem):
         self.total_price = Price(
@@ -97,12 +97,11 @@ class Order(Entity):
         )
 
 
-logger = logging.getLogger(__name__)
-
-
 def start_mappers():
-    logger.info('Starting mappers...')
+    from sqlalchemy.orm import relationship, composite
+    from adapters import orm
 
+    logger.info('Starting mappers...')
     orm.mapper_registry.map_imperatively(Restaurant, orm.restaurant)
     orm.mapper_registry.map_imperatively(
         Order,
@@ -112,6 +111,14 @@ def start_mappers():
                 MenuItem,
                 secondary=orm.order_and_menu_item_association_table,
                 back_populates='orders'
+            ),
+            'total_price': composite(
+                Price,
+                orm.order.c.total_price_value
+            ),
+            'table': composite(
+                Table,
+                orm.order.c.table_index
             )
         }
     )
@@ -123,6 +130,10 @@ def start_mappers():
                 Order,
                 secondary=orm.order_and_menu_item_association_table,
                 back_populates='ordered_menu_items'
+            ),
+            'price': composite(
+                Price,
+                orm.menu_item.c.price_value
             )
         }
     )

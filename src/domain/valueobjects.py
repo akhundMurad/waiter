@@ -32,6 +32,9 @@ def vo(cls):
 class Price:
     value: Decimal = Decimal('0.0')
 
+    def __composite_values__(self):
+        return self.value,
+
     def validate_value(self):
         if self.value < 0:
             raise PriceValueIsLessThanZero('Price cannot be less than zero.')
@@ -40,6 +43,9 @@ class Price:
 @vo
 class Table:
     index: int
+
+    def __composite_values__(self):
+        return self.index,
 
     def validate_index(self):
         if self.index < 0:
