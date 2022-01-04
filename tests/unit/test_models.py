@@ -1,11 +1,12 @@
 from decimal import Decimal
+from qrcode import QRCode as QRCodeObj
 
 import pytest
 
 from domain.exceptions import WrongTableForRestaurant, \
     WrongMenuItemForRestaurant
 from domain.models import Restaurant, MenuItem
-from domain.valueobjects import Price
+from domain.valueobjects import Price, QRCode
 
 
 class TestRestaurant:
@@ -22,6 +23,16 @@ class TestRestaurant:
                                  price=Price(value=Decimal('2.0')))
 
         assert len(restaurant.menu_items) == 1
+
+    def test_generate_qrcode(self, restaurant):
+        restaurant.add_table()
+        table = restaurant.tables[0]
+
+        qrcode = restaurant.generate_qrcode(table)
+
+        assert qrcode.restaurant == restaurant
+        assert qrcode.table == table
+        assert isinstance(qrcode.qrcode_obj,  QRCodeObj)
 
 
 class TestMenuItem:

@@ -1,6 +1,8 @@
-from dataclasses import dataclass
+import qrcode
+
+from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Callable, Any
+from typing import Callable, Any, Optional
 
 from waiter.src.domain.exceptions import PriceValueIsLessThanZero, \
     TableIndexIsLessThanZero
@@ -50,3 +52,28 @@ class Table:
             raise TableIndexIsLessThanZero(
                 'Table index cannot be less than zero'
             )
+
+
+@vo
+class QRCode:
+    table: Table
+    restaurant: Any
+
+    _qrcode_obj: Optional[qrcode.QRCode] = field(default=None, init=False)
+
+    @property
+    def qrcode_obj(self) -> qrcode.QRCode:
+        if self._qrcode_obj is None:
+            self._setup_qrcode_obj()
+        return self._qrcode_obj
+
+    def _setup_qrcode_obj(self) -> None:
+        qrcode_obj = qrcode.QRCode()
+
+        qrcode_obj.add_data({
+            'table': self.table.index,
+            'restaurant': self.restaurant.id
+        })
+
+        qrcode_obj.make(fit=True)
+        self._qrcode_obj = qrcode_obj
