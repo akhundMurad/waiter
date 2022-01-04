@@ -1,19 +1,21 @@
+import logging
 import uuid
-from typing import Optional
 
 from domain.exceptions import WrongMenuItemForRestaurant, \
     WrongTableForRestaurant
 from waiter.src.domain.valueobjects import Price, Table
 
 
-class Entity:
-    _id: Optional[uuid.UUID] = None
+logger = logging.getLogger(__name__)
 
-    @property
-    def id(self) -> uuid.UUID:
-        if self._id is None:
-            self._id = uuid.uuid4()
-        return self._id
+
+def generate_uuid() -> uuid.UUID:
+    return uuid.uuid4()
+
+
+class Entity:
+    def __init__(self, id: uuid.UUID = None):
+        self.id = id or generate_uuid()
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Entity):
@@ -25,15 +27,17 @@ class Entity:
 
 
 class Restaurant(Entity):
-    def __init__(self, name: str):
+    def __init__(self, name: str, id: uuid.UUID = None,
+                 tables=None, menu_items=None):
+        super().__init__(id)
         self.name = name
-        self.tables = set()
-        self.menu_items = set()
+        self.tables = tables or list()
+        self.menu_items = menu_items or list()
 
     def add_table(self):
         previous_table_index = self.get_previous_table_index()
-        table = Table(index=previous_table_index + 1)
-        self.tables.add(table)
+        table = Table(index=previous_table_index + 1, restaurant=self)
+        self.tables.append(table)
 
     def get_previous_table_index(self) -> int:
         try:
@@ -46,13 +50,14 @@ class Restaurant(Entity):
                       description: str, price: Price) -> "MenuItem":
         menu_item = MenuItem(title=title, description=description,
                              price=price, restaurant=self)
-        self.menu_items.add(menu_item)
+        self.menu_items.append(menu_item)
         return menu_item
 
 
 class MenuItem(Entity):
     def __init__(self, title: str, description: str,
-                 price: Price, restaurant: Restaurant):
+                 price: Price, restaurant: Restaurant, id: uuid.UUID = None):
+        super().__init__(id)
         self.title = title
         self.description = description
         self.price = price
@@ -69,9 +74,11 @@ class MenuItem(Entity):
 
 
 class Order(Entity):
-    def __init__(self, table: Table, restaurant: Restaurant):
+    def __init__(self, table: Table, restaurant: Restaurant,
+                 id: uuid.UUID = None):
+        super().__init__(id)
         self.table = table
-        self.ordered_menu_items = set()
+        self.ordered_menu_items = list()
         self.restaurant = restaurant
         self.total_price = Price()
 
@@ -83,9 +90,75 @@ class Order(Entity):
 
         self.add_to_total_price(menu_item)
 
-        self.ordered_menu_items.add(menu_item)
+        self.ordered_menu_items.append(menu_item)
 
     def add_to_total_price(self, menu_item: MenuItem):
         self.total_price = Price(
             value=self.total_price.value + menu_item.price.value
         )
+
+
+def start_mappers():
+    from sqlalchemy.orm import relationship, composite
+    from adapters import orm
+
+    logger.info('Starting mappers...')
+
+    orm.mapper_registry.map_imperatively(
+        Restaurant,
+        orm.restaurant,
+        properties={
+            'orders': relationship(
+                Order,
+                back_populates='restaurant'
+            ),
+            'menu_items': relationship(
+                MenuItem,
+                back_populates='restaurant'
+            ),
+            'tables': relationship(
+                Table,
+                back_populates='restaurant'
+            )
+        }
+    )
+    orm.mapper_registry.map_imperatively(
+        Table,
+        orm.restaurant_table,
+        properties={
+            'restaurant': relationship(Restaurant),
+        }
+    )
+    orm.mapper_registry.map_imperatively(
+        Order,
+        orm.order,
+        properties={
+            'restaurant': relationship(Restaurant),
+            'ordered_menu_items': relationship(
+                MenuItem,
+                secondary=orm.order_and_menu_item_association_table,
+                back_populates='orders'
+            ),
+            'total_price': composite(
+                Price,
+                orm.order.c.total_price_value
+            ),
+            'table': relationship(Table)
+        }
+    )
+    orm.mapper_registry.map_imperatively(
+        MenuItem,
+        orm.menu_item,
+        properties={
+            'restaurant': relationship(Restaurant),
+            'orders': relationship(
+                Order,
+                secondary=orm.order_and_menu_item_association_table,
+                back_populates='ordered_menu_items'
+            ),
+            'price': composite(
+                Price,
+                orm.menu_item.c.price_value
+            )
+        }
+    )

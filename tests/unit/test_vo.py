@@ -17,9 +17,9 @@ class TestPriceValueObject:
 
 
 class TestTableValueObject:
-    def test_raise_table_index_is_less_than_zero(self):
+    def test_raise_table_index_is_less_than_zero(self, restaurant):
         with pytest.raises(
             TableIndexIsLessThanZero,
             match='Table index cannot be less than zero'
         ):
-            Table(index=-1)
+            Table(index=-1, restaurant=restaurant)
