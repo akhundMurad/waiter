@@ -47,14 +47,3 @@ class TestSQLAlchemyRepository:
         menu_item_repo.remove(menu_item.id)
 
         assert menu_item_repo.get(menu_item.id) is None
-
-    def test_add_order(self, order_repo, empty_order):
-        order_repo.add(empty_order)
-
-        assert order_repo.get(empty_order.id) == empty_order
-
-    def test_remove_order(self, order_repo, empty_order):
-        order_repo.add(empty_order)
-        order_repo.remove(empty_order.id)
-
-        assert order_repo.get(empty_order.id) is None

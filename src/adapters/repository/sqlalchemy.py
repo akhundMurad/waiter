@@ -40,21 +40,3 @@ class MenuItemRepository(AbstractRepository):
         self.session.query(models.MenuItem).filter_by(
             id=uuid
         ).delete()
-
-
-class OrderRepository(AbstractRepository):
-    def __init__(self, session: Session):
-        self.session = session
-
-    def add(self, order: models.Order):
-        self.session.add(order)
-
-    def get(self, uuid: UUID) -> models.Order:
-        return self.session.query(models.Order).filter_by(
-            id=uuid
-        ).first()
-
-    def remove(self, uuid: UUID):
-        self.session.query(models.Order).filter_by(
-            id=uuid
-        ).delete()

@@ -21,23 +21,6 @@ class RestaurantRepository(AbstractRepository):
         self.restaurants.remove(restaurant)
 
 
-class OrderRepository(AbstractRepository):
-    orders: set[models.Order] = set()
-
-    def add(self, order: models.Order):
-        self.orders.add(order)
-
-    def get(self, uuid: UUID) -> models.Order:
-        order = list(filter(
-            lambda x: x.id == uuid,
-            self.orders
-        ))[0]
-        return order
-
-    def remove(self, order: models.Order):
-        self.orders.remove(order)
-
-
 class MenuItemRepository(AbstractRepository):
     menu_items: set[models.MenuItem] = set()
 
