@@ -60,6 +60,15 @@ class Restaurant(Entity):
         self.menu_items.append(menu_item)
         return menu_item
 
+    def order_menu_item(self, menu_item: 'MenuItem', table: Table) -> 'Order':
+        if table not in self.tables:
+            raise WrongTableForRestaurant(
+                'Table does not exist in this restaurant.'
+            )
+        order = Order(table=table, restaurant=self)
+        order.add_menu_item(menu_item)
+        return order
+
 
 class MenuItem(Entity):
     def __init__(self, title: str, description: str,
@@ -69,15 +78,6 @@ class MenuItem(Entity):
         self.description = description
         self.price = price
         self.restaurant = restaurant
-
-    def order_item(self, table: Table) -> "Order":
-        if table not in self.restaurant.tables:
-            raise WrongTableForRestaurant(
-                'Table does not exist in this restaurant.'
-            )
-        order = Order(table=table, restaurant=self.restaurant)
-        order.add_menu_item(self)
-        return order
 
 
 class Order(Entity):

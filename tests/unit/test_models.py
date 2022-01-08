@@ -34,16 +34,14 @@ class TestRestaurant:
         assert qrcode.table == table
         assert isinstance(qrcode.qrcode_obj,  QRCodeObj)
 
-
-class TestMenuItem:
     def test_order_item_raise_exception(self, menu_item, table):
         with pytest.raises(WrongTableForRestaurant):
-            menu_item.order_item(table)
+            menu_item.restaurant.order_menu_item(menu_item, table)
 
     def test_order_item_added(self, menu_item):
         menu_item.restaurant.add_table()
         table = list(menu_item.restaurant.tables)[0]
-        order = menu_item.order_item(table)
+        order = menu_item.restaurant.order_menu_item(menu_item, table)
 
         assert order.restaurant.id == menu_item.restaurant.id
         assert menu_item in order.ordered_menu_items
