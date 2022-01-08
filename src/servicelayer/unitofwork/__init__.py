@@ -4,5 +4,18 @@ from domain import repository
 
 
 class AbstractUnitOfWork(ABC):
-    restaurant_repository: repository.AbstractRepository
+    repository: repository.AbstractRepository
 
+    def __enter__(self) -> 'AbstractUnitOfWork':
+        return self
+
+    def __exit__(self, *args, **kwargs) -> None:
+        self.rollback()
+
+    @abstractmethod
+    def commit(self) -> None:
+        pass
+
+    @abstractmethod
+    def rollback(self) -> None:
+        pass
