@@ -3,8 +3,7 @@ import uuid
 
 from domain.exceptions import WrongMenuItemForRestaurant, \
     WrongTableForRestaurant
-from waiter.src.domain.valueobjects import Price, Table
-
+from waiter.src.domain.valueobjects import Price, Table, QRCode
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +32,14 @@ class Restaurant(Entity):
         self.name = name
         self.tables = tables or list()
         self.menu_items = menu_items or list()
+
+    def generate_qrcode(self, table: Table) -> QRCode:
+        if table not in self.tables:
+            raise WrongTableForRestaurant(
+                'Table does not exist in this restaurant.'
+            )
+
+        return QRCode(table=table, restaurant=self)
 
     def add_table(self):
         previous_table_index = self.get_previous_table_index()
