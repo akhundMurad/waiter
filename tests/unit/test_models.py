@@ -18,9 +18,9 @@ class TestRestaurant:
         assert 1 in [table.index for table in restaurant.tables]
         assert 2 in [table.index for table in restaurant.tables]
 
-    def test_add_menu_item(self, restaurant):
-        restaurant.add_menu_item(title='title', description='desc',
-                                 price=Price(value=Decimal('2.0')))
+    def test_create_menu_item(self, restaurant):
+        restaurant.create_menu_item(title='title', description='desc',
+                                    price=Price(value=Decimal('2.0')))
 
         assert len(restaurant.menu_items) == 1
 
@@ -32,7 +32,7 @@ class TestRestaurant:
 
         assert qrcode.restaurant == restaurant
         assert qrcode.table == table
-        assert isinstance(qrcode.qrcode_obj,  QRCodeObj)
+        assert isinstance(qrcode.qrcode_obj, QRCodeObj)
 
     def test_order_item_raise_exception(self, menu_item, table):
         with pytest.raises(WrongTableForRestaurant):
@@ -44,7 +44,7 @@ class TestRestaurant:
         menu_item.restaurant.add_table()
         table = list(menu_item.restaurant.tables)[0]
         order = menu_item.restaurant.make_order([
-            {'menu_item': menu_item, 'quantity': 1}
+            {'menu_item': menu_item.id, 'quantity': 1}
         ], table)
 
         assert order.restaurant.id == menu_item.restaurant.id

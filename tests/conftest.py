@@ -28,7 +28,7 @@ def price():
 
 @pytest.fixture
 def menu_item(restaurant, price):
-    menu_item = restaurant.add_menu_item(
+    menu_item = restaurant.create_menu_item(
         title='title', description='desc', price=price
     )
     return menu_item

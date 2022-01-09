@@ -55,23 +55,39 @@ class Restaurant(Entity):
             index = 0
         return index
 
-    def add_menu_item(self, title: str,
-                      description: str, price: Price) -> "MenuItem":
+    def create_menu_item(self, title: str,
+                         description: str, price: Price) -> "MenuItem":
         menu_item = MenuItem(title=title, description=description,
                              price=price, restaurant=self)
         self.menu_items.append(menu_item)
         return menu_item
 
-    def make_order(self, order_maps: list[dict],
+    def make_order(self, order_mapping: list[dict],
                    table: Table) -> 'Order':
         if table not in self.tables:
             raise WrongTableForRestaurant(
                 'Table does not exist in this restaurant.'
             )
         order = Order(table=table, restaurant=self)
-        for order_map in order_maps:
-            order.add_menu_item(order_map['menu_item'], order_map['quantity'])
+        for order_map in order_mapping:
+            menu_item = self._get_menu_item_by_id(order_map['menu_item'])
+            order.add_menu_item(menu_item, order_map['quantity'])
         return order
+
+    def _get_menu_item_by_id(self, menu_item_id: uuid.UUID) -> 'MenuItem':
+        menu_item = list(
+            filter(
+                lambda x: x.id == menu_item_id,
+                self.menu_items
+            )
+        )
+
+        if not menu_item:
+            raise WrongMenuItemForRestaurant(
+                'Menu item does not exist in this restaurant.'
+            )
+
+        return menu_item[0]
 
 
 class MenuItem(Entity):

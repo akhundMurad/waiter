@@ -20,7 +20,7 @@ def add_table_to_restaurant(
     return table
 
 
-def add_menu_item_to_restaurant(
+def create_menu_item_to_restaurant(
         restaurant_id: UUID,
         title: str,
         description: str,
@@ -31,7 +31,7 @@ def add_menu_item_to_restaurant(
         restaurant = uow.repository.get(restaurant_id)
         if restaurant is None:
             raise InvalidRestaurantUUID('Invalid restaurant UUID.')
-        menu_item = restaurant.add_menu_item(
+        menu_item = restaurant.create_menu_item(
             title=title, description=description, price=price
         )
         uow.commit()
@@ -41,9 +41,16 @@ def add_menu_item_to_restaurant(
 
 def make_order(
         restaurant_id: UUID,
-        menu_items_ids: list[UUID],
+        order_mapping: list[dict],
+        quantity: int,
         uow: unitofwork.AbstractUnitOfWork
 ) -> Order:
     with uow:
-        ...
+        restaurant = uow.repository.get(restaurant_id)
+        if restaurant is None:
+            raise InvalidRestaurantUUID('Invalid restaurant UUID.')
+
+        order = restaurant.make_order(order_mapping, quantity)
         uow.commit()
+
+    return order
