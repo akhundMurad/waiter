@@ -1,3 +1,7 @@
+class InvalidRestaurantUUID(Exception):
+    pass
+
+
 class PriceValueIsLessThanZero(Exception):
     pass
 

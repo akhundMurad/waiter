@@ -8,7 +8,7 @@ from adapters.orm import mapper_registry
 from domain.models import start_mappers
 from domain.valueobjects import Price, Table
 from domain import models
-from settings import test
+import settings
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def price():
 
 @pytest.fixture
 def menu_item(restaurant, price):
-    menu_item = restaurant.add_menu_item(
+    menu_item = restaurant.create_menu_item(
         title='title', description='desc', price=price
     )
     return menu_item
@@ -43,7 +43,7 @@ def empty_order(restaurant):
 
 @pytest.fixture(scope='session')
 def pg_db():
-    engine = create_engine(test.get_postgres_uri())
+    engine = create_engine(settings.get_postgres_uri())
     mapper_registry.metadata.create_all(engine)
     return engine
 

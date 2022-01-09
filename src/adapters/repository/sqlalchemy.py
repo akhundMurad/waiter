@@ -22,21 +22,3 @@ class RestaurantRepository(AbstractRepository):
         self.session.query(models.Restaurant).filter_by(
             id=uuid
         ).delete()
-
-
-class MenuItemRepository(AbstractRepository):
-    def __init__(self, session: Session):
-        self.session = session
-
-    def add(self, menu_item: models.MenuItem):
-        self.session.add(menu_item)
-
-    def get(self, uuid: UUID) -> models.MenuItem:
-        return self.session.query(models.MenuItem).filter_by(
-            id=uuid
-        ).first()
-
-    def remove(self, uuid: UUID):
-        self.session.query(models.MenuItem).filter_by(
-            id=uuid
-        ).delete()

@@ -20,8 +20,7 @@ restaurant_table = sa.Table(
     sa.Column('id', sa_psql.UUID(as_uuid=True),
               primary_key=True, default=uuid.uuid4),
     sa.Column('index', sa.Integer, nullable=False),
-    sa.Column('restaurant_id', sa.ForeignKey('restaurant.id'),
-              primary_key=True)
+    sa.Column('restaurant_id', sa.ForeignKey('restaurant.id'), nullable=False)
 )
 
 menu_item = sa.Table(
@@ -37,20 +36,23 @@ menu_item = sa.Table(
     ), nullable=False)
 )
 
-order_and_menu_item_association_table = sa.Table(
-    'order_and_menu_item_association_table',
-    mapper_registry.metadata,
-    sa.Column('order_id', sa.ForeignKey('order.id'), primary_key=True),
-    sa.Column('menu_item_id', sa.ForeignKey('menu_item.id'), primary_key=True)
-)
-
 order = sa.Table(
     'order',
     mapper_registry.metadata,
     sa.Column('id', sa_psql.UUID(as_uuid=True),
               primary_key=True, default=uuid.uuid4),
-    sa.Column('table_index',
-              sa.ForeignKey('restaurant_table.index'), nullable=False),
+    sa.Column('table_id',
+              sa.ForeignKey('restaurant_table.id'), nullable=False),
     sa.Column('total_price_value', sa.DECIMAL, nullable=False),
     sa.Column('restaurant_id', sa.ForeignKey('restaurant.id'), nullable=False)
+)
+
+order_item = sa.Table(
+    'order_item',
+    mapper_registry.metadata,
+    sa.Column('id', sa_psql.UUID(as_uuid=True),
+              primary_key=True, default=uuid.uuid4),
+    sa.Column('menu_item_id', sa.ForeignKey('menu_item.id'), nullable=False),
+    sa.Column('order_id', sa.ForeignKey('order.id'), nullable=False),
+    sa.Column('quantity', sa.SmallInteger, nullable=False)
 )

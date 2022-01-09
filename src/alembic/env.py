@@ -8,7 +8,7 @@ sys.path = ['', '..'] + sys.path[1:]
 
 from alembic import context
 from adapters import orm
-from settings.local import get_postgres_uri
+from settings import get_postgres_uri
 
 config = context.config
 
