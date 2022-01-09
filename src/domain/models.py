@@ -86,10 +86,10 @@ class MenuItem(Entity):
 
 class Order(Entity):
     def __init__(self, table: Table, restaurant: Restaurant,
-                 id: uuid.UUID = None):
+                 order_items: list = None, id: uuid.UUID = None):
         super().__init__(id)
         self.table = table
-        self.order_items = list()
+        self.order_items = order_items or list()
         self.restaurant = restaurant
         self.total_price = Price()
 
@@ -151,20 +151,24 @@ def start_mappers():
         }
     )
     orm.mapper_registry.map_imperatively(
+        OrderItem,
+        orm.order_item,
+        properties={
+            'menu_item': relationship(MenuItem),
+            'order': relationship(Order, back_populates='order_items')
+        }
+    )
+    orm.mapper_registry.map_imperatively(
         Order,
         orm.order,
         properties={
             'restaurant': relationship(Restaurant),
-            'ordered_menu_items': relationship(
-                MenuItem,
-                secondary=orm.order_and_menu_item_association_table,
-                back_populates='orders'
-            ),
             'total_price': composite(
                 Price,
                 orm.order.c.total_price_value
             ),
-            'table': relationship(Table)
+            'table': relationship(Table),
+            'order_items': relationship(OrderItem, back_populates='order')
         }
     )
     orm.mapper_registry.map_imperatively(
@@ -172,11 +176,6 @@ def start_mappers():
         orm.menu_item,
         properties={
             'restaurant': relationship(Restaurant),
-            'orders': relationship(
-                Order,
-                secondary=orm.order_and_menu_item_association_table,
-                back_populates='ordered_menu_items'
-            ),
             'price': composite(
                 Price,
                 orm.menu_item.c.price_value
