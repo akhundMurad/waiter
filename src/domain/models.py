@@ -41,10 +41,12 @@ class Restaurant(Entity):
 
         return QRCode(table=table, restaurant=self)
 
-    def add_table(self):
+    def add_table(self) -> 'Table':
         previous_table_index = self.get_previous_table_index()
         table = Table(index=previous_table_index + 1, restaurant=self)
         self.tables.append(table)
+
+        return table
 
     def get_previous_table_index(self) -> int:
         try:
@@ -60,13 +62,15 @@ class Restaurant(Entity):
         self.menu_items.append(menu_item)
         return menu_item
 
-    def order_menu_item(self, menu_item: 'MenuItem', table: Table) -> 'Order':
+    def make_order(self, order_maps: list[dict],
+                   table: Table) -> 'Order':
         if table not in self.tables:
             raise WrongTableForRestaurant(
                 'Table does not exist in this restaurant.'
             )
         order = Order(table=table, restaurant=self)
-        order.add_menu_item(menu_item)
+        for order_map in order_maps:
+            order.add_menu_item(order_map['menu_item'], order_map['quantity'])
         return order
 
 
@@ -85,24 +89,34 @@ class Order(Entity):
                  id: uuid.UUID = None):
         super().__init__(id)
         self.table = table
-        self.ordered_menu_items = list()
+        self.order_items = list()
         self.restaurant = restaurant
         self.total_price = Price()
 
-    def add_menu_item(self, menu_item: MenuItem):
+    def add_menu_item(self, menu_item: MenuItem, quantity: int):
         if menu_item not in self.restaurant.menu_items:
             raise WrongMenuItemForRestaurant(
                 'Menu item does not exist in this restaurant.'
             )
 
-        self.add_to_total_price(menu_item)
+        self.add_to_total_price(menu_item, quantity)
 
-        self.ordered_menu_items.append(menu_item)
-
-    def add_to_total_price(self, menu_item: MenuItem):
-        self.total_price = Price(
-            value=self.total_price.value + menu_item.price.value
+        self.order_items.append(
+            OrderItem(menu_item=menu_item, quantity=quantity)
         )
+
+    def add_to_total_price(self, menu_item: MenuItem, quantity: int):
+        self.total_price = Price(
+            value=self.total_price.value + menu_item.price.value * quantity
+        )
+
+
+class OrderItem(Entity):
+    def __init__(self, menu_item: MenuItem, quantity: int,
+                 id: uuid.UUID = None):
+        super().__init__(id)
+        self.menu_item = menu_item
+        self.quantity = quantity
 
 
 def start_mappers():

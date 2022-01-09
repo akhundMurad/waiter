@@ -36,15 +36,20 @@ class TestRestaurant:
 
     def test_order_item_raise_exception(self, menu_item, table):
         with pytest.raises(WrongTableForRestaurant):
-            menu_item.restaurant.order_menu_item(menu_item, table)
+            menu_item.restaurant.make_order([
+                {'menu_item': menu_item, 'quantity': 1}
+            ], table)
 
     def test_order_item_added(self, menu_item):
         menu_item.restaurant.add_table()
         table = list(menu_item.restaurant.tables)[0]
-        order = menu_item.restaurant.order_menu_item(menu_item, table)
+        order = menu_item.restaurant.make_order([
+            {'menu_item': menu_item, 'quantity': 1}
+        ], table)
 
         assert order.restaurant.id == menu_item.restaurant.id
-        assert menu_item in order.ordered_menu_items
+        assert len(order.order_items) > 0
+        assert menu_item == order.order_items[0].menu_item
         assert table == order.table
 
 
@@ -57,10 +62,11 @@ class TestOrder:
         )
 
         with pytest.raises(WrongMenuItemForRestaurant):
-            empty_order.add_menu_item(menu_item)
+            empty_order.add_menu_item(menu_item, 1)
 
     def test_add_menu_item(self, empty_order, menu_item):
-        empty_order.add_menu_item(menu_item)
+        empty_order.add_menu_item(menu_item, 1)
 
-        assert menu_item in empty_order.ordered_menu_items
+        assert len(empty_order.order_items) > 0
+        assert menu_item == empty_order.order_items[0].menu_item
         assert empty_order.total_price.value == menu_item.price.value
