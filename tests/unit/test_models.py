@@ -20,7 +20,7 @@ class TestRestaurant:
 
     def test_create_menu_item(self, restaurant):
         restaurant.create_menu_item(title='title', description='desc',
-                                    price=Price(value=Decimal('2.0')))
+                                    price=Decimal('2.0'))
 
         assert len(restaurant.menu_items) == 1
 

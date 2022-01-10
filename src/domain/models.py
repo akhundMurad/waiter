@@ -1,28 +1,13 @@
 import logging
 import uuid
+from typing import Optional
 
 from domain.exceptions import WrongMenuItemForRestaurant, \
     WrongTableForRestaurant
 from waiter.src.domain.valueobjects import Price, Table, QRCode
+from .abstract import Entity
 
 logger = logging.getLogger(__name__)
-
-
-def generate_uuid() -> uuid.UUID:
-    return uuid.uuid4()
-
-
-class Entity:
-    def __init__(self, id: uuid.UUID = None):
-        self.id = id or generate_uuid()
-
-    def __eq__(self, other) -> bool:
-        if isinstance(other, Entity):
-            return self.id == other.id
-        return False
-
-    def __hash__(self) -> int:
-        return hash(self.id)
 
 
 class Restaurant(Entity):
@@ -48,6 +33,16 @@ class Restaurant(Entity):
 
         return table
 
+    def get_table_by_index(self, index: int) -> Optional['Table']:
+        table = list(filter(
+            lambda x: x.index == index,
+            self.tables
+        ))
+
+        if not table:
+            return None
+        return table[0]
+
     def get_previous_table_index(self) -> int:
         try:
             index = min([table.index for table in self.tables])
@@ -56,7 +51,8 @@ class Restaurant(Entity):
         return index
 
     def create_menu_item(self, title: str,
-                         description: str, price: Price) -> "MenuItem":
+                         description: str,
+                         price: Price) -> "MenuItem":
         menu_item = MenuItem(title=title, description=description,
                              price=price, restaurant=self)
         self.menu_items.append(menu_item)

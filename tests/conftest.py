@@ -9,6 +9,8 @@ from domain.models import start_mappers
 from domain.valueobjects import Price, Table
 from domain import models
 import settings
+from domain import repository
+from adapters.repository import sqlalchemy as sa_repo
 
 
 @pytest.fixture
@@ -54,3 +56,10 @@ def session_factory(pg_db):
     start_mappers()
     yield sessionmaker(pg_db)
     clear_mappers()
+
+
+@pytest.fixture
+def restaurant_repo(session_factory) -> repository.AbstractRepository:
+    session = session_factory()
+    repo = sa_repo.RestaurantRepository(session)
+    return repo

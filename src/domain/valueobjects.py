@@ -2,10 +2,11 @@ import qrcode
 
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Callable, Any, Optional
+from typing import Callable, Optional
 
 from waiter.src.domain.exceptions import PriceValueIsLessThanZero, \
     TableIndexIsLessThanZero
+from .abstract import Entity
 
 
 def vo(cls):
@@ -27,7 +28,7 @@ def vo(cls):
     setattr(cls, '__post_init__', __post_init__)
     setattr(cls, '_get_validation_methods', _get_validation_methods)
 
-    return dataclass(cls, init=True, repr=True, order=True)
+    return dataclass(cls, init=True, repr=True, order=True, eq=True)
 
 
 @vo
@@ -45,7 +46,7 @@ class Price:
 @vo
 class Table:
     index: int
-    restaurant: Any
+    restaurant: Entity
 
     def validate_index(self):
         if self.index < 0:
@@ -57,7 +58,7 @@ class Table:
 @vo
 class QRCode:
     table: Table
-    restaurant: Any
+    restaurant: Entity
 
     _qrcode_obj: Optional[qrcode.QRCode] = field(default=None, init=False)
 

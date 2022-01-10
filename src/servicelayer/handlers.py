@@ -1,56 +1,85 @@
+import decimal
+import uuid
 from uuid import UUID
 
-from domain.exceptions import InvalidRestaurantUUID
+from domain.exceptions import InvalidRestaurantUUID, WrongTableForRestaurant
 from domain.models import MenuItem, Order
-from domain.valueobjects import Table, Price
+from domain.valueobjects import Price
 from servicelayer import unitofwork
 
 
 def add_table_to_restaurant(
         restaurant_id: UUID,
         uow: unitofwork.AbstractUnitOfWork
-) -> Table:
+) -> int:
     with uow:
         restaurant = uow.repository.get(restaurant_id)
         if restaurant is None:
             raise InvalidRestaurantUUID('Invalid restaurant UUID.')
         table = restaurant.add_table()
+        table_index = table.index
         uow.commit()
 
-    return table
+    return table_index
 
 
 def create_menu_item_to_restaurant(
         restaurant_id: UUID,
         title: str,
         description: str,
-        price: Price,
+        price: float,
         uow: unitofwork.AbstractUnitOfWork
-) -> MenuItem:
+) -> dict:
     with uow:
         restaurant = uow.repository.get(restaurant_id)
         if restaurant is None:
             raise InvalidRestaurantUUID('Invalid restaurant UUID.')
+        price_as_vo = Price(value=decimal.Decimal(price))
         menu_item = restaurant.create_menu_item(
-            title=title, description=description, price=price
+            title=title, description=description, price=price_as_vo
         )
+        menu_item_data = {
+            'id': str(menu_item.id),
+            'title': menu_item.title,
+            'description': menu_item.description,
+            'price': price
+        }
         uow.commit()
 
-    return menu_item
+    return menu_item_data
 
 
 def make_order(
         restaurant_id: UUID,
         order_mapping: list[dict],
-        quantity: int,
+        table: int,
         uow: unitofwork.AbstractUnitOfWork
-) -> Order:
+) -> dict:
     with uow:
         restaurant = uow.repository.get(restaurant_id)
         if restaurant is None:
             raise InvalidRestaurantUUID('Invalid restaurant UUID.')
 
-        order = restaurant.make_order(order_mapping, quantity)
+        table = restaurant.get_table_by_index(table)
+        if table is None:
+            raise WrongTableForRestaurant('Invalid table for restaurant.')
+
+        new_order_mapping = list()
+        for order_mapping in order_mapping:
+            new_order_mapping.append({
+                'menu_item': uuid.UUID(order_mapping['menu_item']),
+                'quantity': order_mapping['quantity']
+            })
+
+        order = restaurant.make_order(
+            order_mapping=new_order_mapping,
+            table=table,
+        )
+        order = {
+            'id': str(order.id),
+            'table': order.table.index,
+            'total_price': float(order.total_price.value)
+        }
         uow.commit()
 
     return order
