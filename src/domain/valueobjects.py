@@ -6,7 +6,7 @@ from typing import Callable, Optional
 
 from waiter.src.domain.exceptions import PriceValueIsLessThanZero, \
     TableIndexIsLessThanZero
-from .abstract import Entity
+from .base import Entity
 
 
 def vo(cls):

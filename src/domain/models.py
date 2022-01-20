@@ -5,7 +5,8 @@ from typing import Optional
 from domain.exceptions import WrongMenuItemForRestaurant, \
     WrongTableForRestaurant
 from waiter.src.domain.valueobjects import Price, Table, QRCode
-from .abstract import Entity
+from .base import Entity
+from .factory import ValueObjectFactory, EntityFactory
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,9 @@ class Restaurant(Entity):
 
     def add_table(self) -> 'Table':
         previous_table_index = self.get_previous_table_index()
-        table = Table(index=previous_table_index + 1, restaurant=self)
+        table = ValueObjectFactory.build(
+            vo_cls=Table, index=previous_table_index + 1, restaurant=self
+        )
         self.tables.append(table)
 
         return table
@@ -53,8 +56,13 @@ class Restaurant(Entity):
     def create_menu_item(self, title: str,
                          description: str,
                          price: Price) -> "MenuItem":
-        menu_item = MenuItem(title=title, description=description,
-                             price=price, restaurant=self)
+        menu_item = EntityFactory.build(
+            entity_cls=MenuItem,
+            title=title,
+            description=description,
+            price=price,
+            restaurant=self
+        )
         self.menu_items.append(menu_item)
         return menu_item
 
@@ -64,7 +72,11 @@ class Restaurant(Entity):
             raise WrongTableForRestaurant(
                 'Table does not exist in this restaurant.'
             )
-        order = Order(table=table, restaurant=self)
+        order = EntityFactory.build(
+            entity_cls=Order,
+            table=table,
+            restaurant=self
+        )
         for order_map in order_mapping:
             menu_item = self._get_menu_item_by_id(order_map['menu_item'])
             order.add_menu_item(menu_item, order_map['quantity'])

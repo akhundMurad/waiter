@@ -6,7 +6,6 @@ import pytest
 from domain.exceptions import WrongTableForRestaurant, \
     WrongMenuItemForRestaurant
 from domain.models import Restaurant, MenuItem
-from domain.valueobjects import Price, QRCode
 
 
 class TestRestaurant:

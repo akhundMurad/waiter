@@ -11,21 +11,26 @@ from domain import models
 import settings
 from domain import repository
 from adapters.repository import sqlalchemy as sa_repo
+from domain.factory import EntityFactory, ValueObjectFactory
 
 
 @pytest.fixture
 def restaurant():
-    return models.Restaurant(name='name')
+    return EntityFactory.build(entity_cls=models.Restaurant, name='name')
 
 
 @pytest.fixture
 def table(restaurant):
-    return Table(index=1, restaurant=restaurant)
+    return ValueObjectFactory.build(
+        vo_cls=Table,
+        index=1,
+        restaurant=restaurant
+    )
 
 
 @pytest.fixture
 def price():
-    return Price(value=Decimal('2.0'))
+    return ValueObjectFactory.build(vo_cls=Price, value=Decimal('2.0'))
 
 
 @pytest.fixture
@@ -39,8 +44,11 @@ def menu_item(restaurant, price):
 @pytest.fixture
 def empty_order(restaurant):
     restaurant.add_table()
-    return models.Order(table=list(restaurant.tables)[0],
-                        restaurant=restaurant)
+    return EntityFactory.build(
+        entity_cls=models.Order,
+        table=list(restaurant.tables)[0],
+        restaurant=restaurant
+    )
 
 
 @pytest.fixture(scope='session')

@@ -3,7 +3,6 @@ import uuid
 from uuid import UUID
 
 from domain.exceptions import InvalidRestaurantUUID, WrongTableForRestaurant
-from domain.models import MenuItem, Order
 from domain.valueobjects import Price
 from servicelayer import unitofwork
 
