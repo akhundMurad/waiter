@@ -4,7 +4,7 @@ from fastapi.routing import APIRouter
 from fastapi import status, Depends
 from starlette.responses import JSONResponse
 
-from entrypoints.fastapi import schema
+from domain import dto
 from entrypoints.providers.uow import uow_provider
 from servicelayer import handlers
 from servicelayer.unitofwork import AbstractUnitOfWork
@@ -17,11 +17,11 @@ router = APIRouter(
 
 @router.post(
     '/restaurant/{restaurant_id}/order/',
-    response_model=schema.OrderRead
+    response_model=dto.OrderRead
 )
 def make_order(
         restaurant_id: uuid.UUID,
-        order: schema.OrderWrite,
+        order: dto.OrderWrite,
         uow: AbstractUnitOfWork = Depends(uow_provider)
 ) -> JSONResponse:
     order = handlers.make_order(
@@ -35,7 +35,7 @@ def make_order(
     )
 
     return JSONResponse(
-        content=schema.OrderRead(**order).dict(),
+        content=order.dict(),
         status_code=status.HTTP_201_CREATED
     )
 

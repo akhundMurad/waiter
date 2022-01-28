@@ -2,6 +2,7 @@ import decimal
 import uuid
 from uuid import UUID
 
+from domain import dto
 from domain.exceptions import InvalidRestaurantUUID, WrongTableForRestaurant
 from domain.valueobjects import Price
 from servicelayer import unitofwork
@@ -10,16 +11,18 @@ from servicelayer import unitofwork
 def add_table_to_restaurant(
         restaurant_id: UUID,
         uow: unitofwork.AbstractUnitOfWork
-) -> int:
+) -> dto.TableRead:
     with uow:
         restaurant = uow.repository.get(restaurant_id)
         if restaurant is None:
             raise InvalidRestaurantUUID('Invalid restaurant UUID.')
         table = restaurant.add_table()
-        table_index = table.index
+        table = dto.TableRead(
+            index=table.index
+        )
         uow.commit()
 
-    return table_index
+    return table
 
 
 def create_menu_item_to_restaurant(
@@ -28,7 +31,7 @@ def create_menu_item_to_restaurant(
         description: str,
         price: float,
         uow: unitofwork.AbstractUnitOfWork
-) -> dict:
+) -> dto.MenuItemRead:
     with uow:
         restaurant = uow.repository.get(restaurant_id)
         if restaurant is None:
@@ -37,15 +40,15 @@ def create_menu_item_to_restaurant(
         menu_item = restaurant.create_menu_item(
             title=title, description=description, price=price_as_vo
         )
-        menu_item_data = {
-            'id': str(menu_item.id),
-            'title': menu_item.title,
-            'description': menu_item.description,
-            'price': price
-        }
+        menu_item = dto.MenuItemRead(
+            id=str(menu_item.id),
+            title=menu_item.title,
+            description=menu_item.description,
+            price=float(menu_item.price.value)
+        )
         uow.commit()
 
-    return menu_item_data
+    return menu_item
 
 
 def make_order(
@@ -53,7 +56,7 @@ def make_order(
         order_mapping: list[dict],
         table: int,
         uow: unitofwork.AbstractUnitOfWork
-) -> dict:
+) -> dto.OrderRead:
     with uow:
         restaurant = uow.repository.get(restaurant_id)
         if restaurant is None:
@@ -74,11 +77,11 @@ def make_order(
             order_mapping=new_order_mapping,
             table=table,
         )
-        order = {
-            'id': str(order.id),
-            'table': order.table.index,
-            'total_price': float(order.total_price.value)
-        }
+        order = dto.OrderRead(
+            id=str(order.id),
+            table=order.table.index,
+            total_price=float(order.total_price.value)
+        )
         uow.commit()
 
     return order
