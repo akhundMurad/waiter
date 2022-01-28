@@ -2,7 +2,7 @@ import uuid
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as sa_psql
-from sqlalchemy.orm import relationship, registry
+from sqlalchemy.orm import registry
 
 mapper_registry = registry()
 
