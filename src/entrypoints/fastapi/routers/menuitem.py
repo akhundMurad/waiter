@@ -10,13 +10,13 @@ from servicelayer import handlers
 from servicelayer.unitofwork import AbstractUnitOfWork
 
 router = APIRouter(
-    # prefix='menu-item',
+    prefix='/menu-item',
     tags=['menu-item']
 )
 
 
 @router.post(
-    '/restaurant/{restaurant_id}/menu-item/',
+    '/{restaurant_id}/',
     response_model=dto.MenuItemRead
 )
 def create_menu_item_to_restaurant(

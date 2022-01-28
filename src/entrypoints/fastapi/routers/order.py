@@ -10,22 +10,21 @@ from servicelayer import handlers
 from servicelayer.unitofwork import AbstractUnitOfWork
 
 router = APIRouter(
-    # prefix='order',
+    prefix='/order',
     tags=['order']
 )
 
 
 @router.post(
-    '/restaurant/{restaurant_id}/order/',
+    '/',
     response_model=dto.OrderRead
 )
 def make_order(
-        restaurant_id: uuid.UUID,
         order: dto.OrderWrite,
         uow: AbstractUnitOfWork = Depends(uow_provider)
 ) -> JSONResponse:
     order = handlers.make_order(
-        restaurant_id=restaurant_id,
+        restaurant_id=uuid.UUID(order.restaurant_id),
         order_mapping=[
             order_mapping.dict()
             for order_mapping in order.order_mapping

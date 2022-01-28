@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import BaseModel as DTO
 
 
@@ -22,6 +24,7 @@ class OrderMapping(DTO):
 class OrderWrite(DTO):
     table: int
     order_mapping: list[OrderMapping]
+    restaurant_id: str
 
 
 class OrderRead(DTO):
