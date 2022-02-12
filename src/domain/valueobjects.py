@@ -2,35 +2,13 @@ import qrcode
 
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Callable, Any, Optional
+from typing import Optional
 
-from waiter.src.domain.exceptions import PriceValueIsLessThanZero, \
-    TableIndexIsLessThanZero
-
-
-def vo(cls):
-    """Value object decorator
-    """
-    def __post_init__(self):
-        validation_methods = self._get_validation_methods()
-        for method in validation_methods:
-            method()
-
-    def _get_validation_methods(self) -> list[Callable]:
-        methods: list[Callable] = list()
-        for method in dir(self):
-            if method.split('_')[0] == 'validate':
-                methods.append(getattr(self, method))
-
-        return methods
-
-    setattr(cls, '__post_init__', __post_init__)
-    setattr(cls, '_get_validation_methods', _get_validation_methods)
-
-    return dataclass(cls, init=True, repr=True, order=True)
+from . import exceptions
+from .base import Entity
 
 
-@vo
+@dataclass(init=True, repr=True, order=True, eq=True)
 class Price:
     value: Decimal = Decimal('0.0')
 
@@ -39,25 +17,27 @@ class Price:
 
     def validate_value(self):
         if self.value < 0:
-            raise PriceValueIsLessThanZero('Price cannot be less than zero.')
-
-
-@vo
-class Table:
-    index: int
-    restaurant: Any
-
-    def validate_index(self):
-        if self.index < 0:
-            raise TableIndexIsLessThanZero(
-                'Table index cannot be less than zero'
+            raise exceptions.PriceValueIsLessThanZero(
+                'Price cannot be less than zero.'
             )
 
 
-@vo
+@dataclass(init=True, repr=True, order=True, eq=True)
+class Table:
+    index: int
+    restaurant: Entity
+
+    def validate_index(self):
+        if self.index < 0:
+            raise exceptions.TableIndexIsLessThanZero(
+                'Table index cannot be less than zero.'
+            )
+
+
+@dataclass(init=True, repr=True, order=True, eq=True)
 class QRCode:
     table: Table
-    restaurant: Any
+    restaurant: Entity
 
     _qrcode_obj: Optional[qrcode.QRCode] = field(default=None, init=False)
 

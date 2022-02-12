@@ -3,9 +3,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 
 import settings
-from . import AbstractUnitOfWork
+from .abstract import AbstractUnitOfWork
 from adapters.repository import sqlalchemy
-
 
 DEFAULT_SESSION_FACTORY = sessionmaker(
     bind=create_engine(

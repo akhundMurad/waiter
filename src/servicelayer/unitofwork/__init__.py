@@ -1,21 +1,11 @@
-from abc import ABC, abstractmethod
+import importlib
+from settings import UNIT_OF_WORK_TYPE
+from .abstract import AbstractUnitOfWork  # noqa: F401
 
-from domain import repository
+
+uow = importlib.import_module(
+    f'servicelayer.unitofwork.{UNIT_OF_WORK_TYPE}'
+)
 
 
-class AbstractUnitOfWork(ABC):
-    repository: repository.AbstractRepository
-
-    def __enter__(self) -> 'AbstractUnitOfWork':
-        return self
-
-    def __exit__(self, *args, **kwargs) -> None:
-        self.rollback()
-
-    @abstractmethod
-    def commit(self) -> None:
-        pass
-
-    @abstractmethod
-    def rollback(self) -> None:
-        pass
+RestaurantUnitOfWork = uow.RestaurantUnitOfWork
