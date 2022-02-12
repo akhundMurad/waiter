@@ -2,11 +2,13 @@ import logging
 import uuid
 from typing import Optional
 
-from domain.exceptions import WrongMenuItemForRestaurant, \
-    WrongTableForRestaurant
-from waiter.src.domain.valueobjects import Price, Table, QRCode
+from sqlalchemy.orm import relationship, composite
+
+from domain import exceptions
+from domain.valueobjects import Price, Table, QRCode
 from .base import Entity
 from .factory import ValueObjectFactory, EntityFactory
+from adapters import orm
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +23,7 @@ class Restaurant(Entity):
 
     def generate_qrcode(self, table: Table) -> QRCode:
         if table not in self.tables:
-            raise WrongTableForRestaurant(
+            raise exceptions.WrongTableForRestaurant(
                 'Table does not exist in this restaurant.'
             )
 
@@ -69,7 +71,7 @@ class Restaurant(Entity):
     def make_order(self, order_mapping: list[dict],
                    table: Table) -> 'Order':
         if table not in self.tables:
-            raise WrongTableForRestaurant(
+            raise exceptions.WrongTableForRestaurant(
                 'Table does not exist in this restaurant.'
             )
         order = EntityFactory.build(
@@ -91,7 +93,7 @@ class Restaurant(Entity):
         )
 
         if not menu_item:
-            raise WrongMenuItemForRestaurant(
+            raise exceptions.WrongMenuItemForRestaurant(
                 'Menu item does not exist in this restaurant.'
             )
 
@@ -119,7 +121,7 @@ class Order(Entity):
 
     def add_menu_item(self, menu_item: MenuItem, quantity: int):
         if menu_item not in self.restaurant.menu_items:
-            raise WrongMenuItemForRestaurant(
+            raise exceptions.WrongMenuItemForRestaurant(
                 'Menu item does not exist in this restaurant.'
             )
 
@@ -144,65 +146,56 @@ class OrderItem(Entity):
 
 
 def start_mappers():
-    from sqlalchemy.orm import relationship, composite
-    from adapters import orm
-
     logger.info('Starting mappers...')
 
     orm.mapper_registry.map_imperatively(
-        Restaurant,
-        orm.restaurant,
-        properties={
-            'orders': relationship(
-                Order,
-                back_populates='restaurant'
-            ),
-            'menu_items': relationship(
-                MenuItem,
-                back_populates='restaurant'
-            ),
-            'tables': relationship(
-                Table,
-                back_populates='restaurant'
-            )
-        }
+        Table,
+        orm.restaurant_table
     )
     orm.mapper_registry.map_imperatively(
-        Table,
-        orm.restaurant_table,
+        MenuItem,
+        orm.menu_item,
         properties={
-            'restaurant': relationship(Restaurant),
+            'price': composite(
+                Price,
+                orm.menu_item.c.price_value
+            )
         }
     )
     orm.mapper_registry.map_imperatively(
         OrderItem,
         orm.order_item,
         properties={
-            'menu_item': relationship(MenuItem),
-            'order': relationship(Order, back_populates='order_items')
+            'menu_item': relationship('MenuItem')
         }
     )
     orm.mapper_registry.map_imperatively(
         Order,
         orm.order,
         properties={
-            'restaurant': relationship(Restaurant),
             'total_price': composite(
                 Price,
                 orm.order.c.total_price_value
             ),
-            'table': relationship(Table),
-            'order_items': relationship(OrderItem, back_populates='order')
+            'table': relationship('Table'),
+            'order_items': relationship('OrderItem', backref='order')
         }
     )
     orm.mapper_registry.map_imperatively(
-        MenuItem,
-        orm.menu_item,
+        Restaurant,
+        orm.restaurant,
         properties={
-            'restaurant': relationship(Restaurant),
-            'price': composite(
-                Price,
-                orm.menu_item.c.price_value
+            'orders': relationship(
+                'Order',
+                backref='restaurant'
+            ),
+            'menu_items': relationship(
+                'MenuItem',
+                backref='restaurant'
+            ),
+            'tables': relationship(
+                'Table',
+                backref='restaurant'
             )
         }
     )

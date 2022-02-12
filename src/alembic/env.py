@@ -7,8 +7,8 @@ from sqlalchemy import pool
 sys.path = ['', '..'] + sys.path[1:]
 
 from alembic import context
-from adapters import orm
-from settings import get_postgres_uri
+from src.adapters import orm
+from src.settings import get_postgres_uri
 
 config = context.config
 

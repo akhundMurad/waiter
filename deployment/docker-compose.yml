@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:14.1-alpine
+    ports:
+      - "5432:5432"
+    container_name: db
+    restart: unless-stopped
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  migrations:
+    build:
+      context: ../
+      dockerfile: ./src/entrypoints/fastapi/Dockerfile
+    restart: on-failure
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    command: sh -c "cd .. && alembic -c deployment/alembic.ini upgrade head"
+
+  app:
+    build:
+      context: ../
+      dockerfile: ./src/entrypoints/fastapi/Dockerfile
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    container_name: app
+    depends_on:
+      - postgres
+      - migrations
+
+volumes:
+  db-data:

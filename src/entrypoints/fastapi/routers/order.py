@@ -37,4 +37,3 @@ def make_order(
         content=order.dict(),
         status_code=status.HTTP_201_CREATED
     )
-

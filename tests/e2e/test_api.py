@@ -42,7 +42,7 @@ def test_make_order(restaurant_repo, menu_item, test_client):
     }
 
     response = test_client.post(
-        f'/order/', json=data
+        '/order/', json=data
     )
 
     assert response.status_code == 201

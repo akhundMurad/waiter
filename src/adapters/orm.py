@@ -1,8 +1,9 @@
 import uuid
 
 import sqlalchemy as sa
+from sqlalchemy import create_engine
 from sqlalchemy.dialects import postgresql as sa_psql
-from sqlalchemy.orm import registry
+from sqlalchemy.orm import registry, sessionmaker
 
 mapper_registry = registry()
 
@@ -56,3 +57,15 @@ order_item = sa.Table(
     sa.Column('order_id', sa.ForeignKey('order.id'), nullable=False),
     sa.Column('quantity', sa.SmallInteger, nullable=False)
 )
+
+
+def get_sa_sessionmaker() -> sessionmaker:
+    from settings import get_postgres_uri
+
+    engine = create_engine(get_postgres_uri())
+    mapper_registry.metadata.create_all(engine)
+    return sessionmaker(
+        bind=engine,
+        expire_on_commit=False,
+        autoflush=False
+    )

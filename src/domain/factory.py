@@ -20,4 +20,19 @@ class EntityFactory:
 class ValueObjectFactory:
     @classmethod
     def build(cls, *, vo_cls: typing.Any, **data) -> typing.Any:
-        return vo_cls(**data)
+        vo_obj = vo_cls(**data)
+
+        validate_vo(vo_obj)
+
+        return vo_obj
+
+
+def validate_vo(vo_obj: typing.Any) -> None:
+    for method in _get_validation_methods(vo_obj):
+        method()
+
+
+def _get_validation_methods(vo_obj: typing.Any) -> typing.Generator:
+    for method in dir(vo_obj):
+        if method.split('_')[0] == 'validate':
+            yield getattr(vo_obj, method)
