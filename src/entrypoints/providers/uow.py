@@ -1,4 +1,5 @@
-from servicelayer.unitofwork import AbstractUnitOfWork, RestaurantUnitOfWork
+from servicelayer.unitofwork.abstract import AbstractUnitOfWork
+from servicelayer.unitofwork.sqlalchemy import RestaurantUnitOfWork
 
 
 def uow_provider() -> AbstractUnitOfWork:
