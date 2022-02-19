@@ -4,37 +4,32 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import clear_mappers, sessionmaker
 
-from adapters.orm import mapper_registry
+from adapters.orm import get_connection_string, mapper_registry
 from domain.models import start_mappers
 from domain.valueobjects import Price, Table
 from domain import models
-import settings
 from domain import repository
 from adapters.repository import sqlalchemy as sa_repo
-from domain.factory import EntityFactory, ValueObjectFactory
+from settings import Settings
 
 
 @pytest.fixture
-def restaurant():
-    return EntityFactory.build(entity_cls=models.Restaurant, name='name')
+def restaurant() -> models.Restaurant:
+    return models.Restaurant(name='name')
 
 
 @pytest.fixture
-def table(restaurant):
-    return ValueObjectFactory.build(
-        vo_cls=Table,
-        index=1,
-        restaurant=restaurant
-    )
+def table(restaurant) -> Table:
+    return Table(index=1, restaurant=restaurant)
 
 
 @pytest.fixture
-def price():
-    return ValueObjectFactory.build(vo_cls=Price, value=Decimal('2.0'))
+def price() -> Price:
+    return Price(value=Decimal(2.0))
 
 
 @pytest.fixture
-def menu_item(restaurant, price):
+def menu_item(restaurant, price) -> models.MenuItem:
     menu_item = restaurant.create_menu_item(
         title='title', description='desc', price=price
     )
@@ -42,18 +37,29 @@ def menu_item(restaurant, price):
 
 
 @pytest.fixture
-def empty_order(restaurant):
+def empty_order(restaurant) -> models.Order:
     restaurant.add_table()
-    return EntityFactory.build(
-        entity_cls=models.Order,
-        table=list(restaurant.tables)[0],
+    return models.Order(
+        table=restaurant.tables.pop(),
         restaurant=restaurant
     )
 
 
-@pytest.fixture(scope='session')
-def pg_db():
-    engine = create_engine(settings.get_postgres_uri())
+@pytest.fixture
+def settings() -> Settings:
+    return Settings(
+        postgres_host='localhost',
+        postgres_port=5432,
+        postgres_password='waiter',
+        postgres_name='waiter',
+        postgres_user='waiter',
+        map_models=False
+    )
+
+
+@pytest.fixture
+def pg_db(settings):
+    engine = create_engine(get_connection_string(settings))
     mapper_registry.metadata.create_all(engine)
     return engine
 

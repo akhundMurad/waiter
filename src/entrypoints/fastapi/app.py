@@ -1,28 +1,31 @@
 from fastapi import FastAPI
-from sqlalchemy.orm import sessionmaker
 
 from adapters.orm import get_sa_sessionmaker
 from domain.models import start_mappers
 from entrypoints.fastapi.routers import table, menuitem, order
 from entrypoints.providers.uow import uow_provider, get_uow
+from entrypoints.providers.settings import get_settings
+from settings import Settings
 
 
-def get_app(do_mapping: bool = True) -> FastAPI:
-    app = FastAPI()
+def get_app(settings: Settings = get_settings()) -> FastAPI:
+    application = FastAPI()
 
-    sa_sessionmaker = get_sa_sessionmaker()
+    sa_sessionmaker = get_sa_sessionmaker(settings)
 
-    if do_mapping:
+    if settings.map_models:
         start_mappers()
 
-    app.include_router(table.router)
-    app.include_router(menuitem.router)
-    app.include_router(order.router)
+    application.include_router(table.router)
+    application.include_router(menuitem.router)
+    application.include_router(order.router)
 
-    app.dependency_overrides[uow_provider] = get_uow
-    app.dependency_overrides[sessionmaker] = sa_sessionmaker
+    application.state.settings = settings
+    application.state.sessionmaker = sa_sessionmaker
 
-    return app
+    application.dependency_overrides[uow_provider] = get_uow
+
+    return application
 
 
 app = get_app()

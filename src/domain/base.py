@@ -1,9 +1,13 @@
 import uuid
 
 
+def generate_uuid() -> uuid.UUID:
+    return uuid.uuid4()
+
+
 class Entity:
     def __init__(self, id: uuid.UUID = None):
-        self.id = id
+        self.id = id or generate_uuid()
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Entity):

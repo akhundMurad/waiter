@@ -7,7 +7,7 @@ from starlette.responses import JSONResponse
 from domain import dto
 from entrypoints.providers.uow import uow_provider
 from servicelayer import handlers
-from servicelayer.unitofwork import AbstractUnitOfWork
+from servicelayer.unitofwork.abstract import AbstractUnitOfWork
 
 router = APIRouter(
     prefix='/table',

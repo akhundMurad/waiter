@@ -7,7 +7,7 @@ from starlette.responses import JSONResponse
 from entrypoints.providers.uow import uow_provider
 from domain import dto
 from servicelayer import handlers
-from servicelayer.unitofwork import AbstractUnitOfWork
+from servicelayer.unitofwork.abstract import AbstractUnitOfWork
 
 router = APIRouter(
     prefix='/menu-item',

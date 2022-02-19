@@ -1,21 +1,11 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 
-import settings
 from .abstract import AbstractUnitOfWork
 from adapters.repository import sqlalchemy
 
-DEFAULT_SESSION_FACTORY = sessionmaker(
-    bind=create_engine(
-        settings.get_postgres_uri(),
-        isolation_level='REPEATABLE READ'
-    )
-)
-
 
 class RestaurantUnitOfWork(AbstractUnitOfWork):
-    def __init__(self, session_factory=DEFAULT_SESSION_FACTORY):
+    def __init__(self, session_factory):
         self.session_factory = session_factory
 
     def __enter__(self):

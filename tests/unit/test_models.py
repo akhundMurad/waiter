@@ -1,4 +1,3 @@
-from decimal import Decimal
 from qrcode import QRCode as QRCodeObj
 
 import pytest
@@ -17,15 +16,15 @@ class TestRestaurant:
         assert 1 in [table.index for table in restaurant.tables]
         assert 2 in [table.index for table in restaurant.tables]
 
-    def test_create_menu_item(self, restaurant):
+    def test_create_menu_item(self, restaurant, price):
         restaurant.create_menu_item(title='title', description='desc',
-                                    price=Decimal('2.0'))
+                                    price=price)
 
         assert len(restaurant.menu_items) == 1
 
     def test_generate_qrcode(self, restaurant):
         restaurant.add_table()
-        table = restaurant.tables[0]
+        table = list(restaurant.tables)[0]
 
         qrcode = restaurant.generate_qrcode(table)
 
@@ -48,7 +47,7 @@ class TestRestaurant:
 
         assert order.restaurant.id == menu_item.restaurant.id
         assert len(order.order_items) > 0
-        assert menu_item == order.order_items[0].menu_item
+        assert menu_item == order.order_items.pop().menu_item
         assert table == order.table
 
 
@@ -67,5 +66,5 @@ class TestOrder:
         empty_order.add_menu_item(menu_item, 1)
 
         assert len(empty_order.order_items) > 0
-        assert menu_item == empty_order.order_items[0].menu_item
+        assert menu_item == empty_order.order_items.pop().menu_item
         assert empty_order.total_price.value == menu_item.price.value

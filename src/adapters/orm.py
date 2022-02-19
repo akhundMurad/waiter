@@ -1,6 +1,7 @@
 import uuid
 
 import sqlalchemy as sa
+from pydantic import BaseSettings
 from sqlalchemy import create_engine
 from sqlalchemy.dialects import postgresql as sa_psql
 from sqlalchemy.orm import registry, sessionmaker
@@ -59,11 +60,19 @@ order_item = sa.Table(
 )
 
 
-def get_sa_sessionmaker() -> sessionmaker:
-    from settings import get_postgres_uri
+def get_connection_string(settings: BaseSettings) -> str:
+    connection_string = 'postgresql://'
+    connection_string += f'{settings.postgres_user}:'
+    connection_string += f'{settings.postgres_password}@'
+    connection_string += f'{settings.postgres_host}:'
+    connection_string += f'{settings.postgres_port}/'
+    connection_string += f'{settings.postgres_name}'
+    return connection_string
 
-    engine = create_engine(get_postgres_uri())
-    mapper_registry.metadata.create_all(engine)
+
+def get_sa_sessionmaker(settings: BaseSettings) -> sessionmaker:
+    engine = create_engine(get_connection_string(settings))
+
     return sessionmaker(
         bind=engine,
         expire_on_commit=False,
