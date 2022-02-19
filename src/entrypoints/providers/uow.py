@@ -9,4 +9,4 @@ def uow_provider(request: Request) -> AbstractUnitOfWork:
 
 
 def get_uow(request: Request) -> RestaurantUnitOfWork:
-    return RestaurantUnitOfWork(request.state.db_session)
+    return RestaurantUnitOfWork(request.app.state.sessionmaker)

@@ -13,12 +13,17 @@ logger = logging.getLogger(__name__)
 
 
 class Restaurant(Entity):
-    def __init__(self, name: str, id: uuid.UUID = None,
-                 tables=None, menu_items=None):
+    def __init__(
+            self,
+            name: str,
+            tables: set | None = None,
+            menu_items: set | None = None,
+            id: uuid.UUID | None = None,
+    ):
         super().__init__(id)
         self.name = name
-        self.tables = tables or list()
-        self.menu_items = menu_items or list()
+        self.tables = tables or set()
+        self.menu_items = menu_items or set()
 
     def generate_qrcode(self, table: Table) -> QRCode:
         if table not in self.tables:
@@ -34,7 +39,7 @@ class Restaurant(Entity):
             index=previous_table_index + 1,
             restaurant=self
         )
-        self.tables.append(table)
+        self.tables.add(table)
 
         return table
 
@@ -55,20 +60,26 @@ class Restaurant(Entity):
             index = 0
         return index
 
-    def create_menu_item(self, title: str,
-                         description: str,
-                         price: Price) -> "MenuItem":
+    def create_menu_item(
+            self,
+            title: str,
+            description: str,
+            price: Price
+    ) -> "MenuItem":
         menu_item = MenuItem(
             title=title,
             description=description,
             price=price,
             restaurant=self
         )
-        self.menu_items.append(menu_item)
+        self.menu_items.add(menu_item)
         return menu_item
 
-    def make_order(self, order_mapping: list[dict],
-                   table: Table) -> 'Order':
+    def make_order(
+            self,
+            order_mapping: list[dict],
+            table: Table
+    ) -> 'Order':
         if table not in self.tables:
             raise exceptions.WrongTableForRestaurant(
                 'Table does not exist in this restaurant.'
@@ -82,7 +93,10 @@ class Restaurant(Entity):
             order.add_menu_item(menu_item, order_map['quantity'])
         return order
 
-    def _get_menu_item_by_id(self, menu_item_id: uuid.UUID) -> 'MenuItem':
+    def _get_menu_item_by_id(
+            self,
+            menu_item_id: uuid.UUID
+    ) -> 'MenuItem':
         menu_item = list(
             filter(
                 lambda x: x.id == menu_item_id,
@@ -99,8 +113,14 @@ class Restaurant(Entity):
 
 
 class MenuItem(Entity):
-    def __init__(self, title: str, description: str,
-                 price: Price, restaurant: Restaurant, id: uuid.UUID = None):
+    def __init__(
+            self,
+            title: str,
+            description: str,
+            price: Price,
+            restaurant: Restaurant,
+            id: uuid.UUID | None = None
+    ):
         super().__init__(id)
         self.title = title
         self.description = description
@@ -109,11 +129,16 @@ class MenuItem(Entity):
 
 
 class Order(Entity):
-    def __init__(self, table: Table, restaurant: Restaurant,
-                 order_items: list = None, id: uuid.UUID = None):
+    def __init__(
+            self,
+            table: Table,
+            restaurant: Restaurant,
+            order_items: set | None = None,
+            id: uuid.UUID | None = None
+    ):
         super().__init__(id)
         self.table = table
-        self.order_items = order_items or list()
+        self.order_items = order_items or set()
         self.restaurant = restaurant
         self.total_price = Price()
 
@@ -125,7 +150,7 @@ class Order(Entity):
 
         self.add_to_total_price(menu_item, quantity)
 
-        self.order_items.append(
+        self.order_items.add(
             OrderItem(menu_item=menu_item, quantity=quantity)
         )
 
@@ -136,8 +161,12 @@ class Order(Entity):
 
 
 class OrderItem(Entity):
-    def __init__(self, menu_item: MenuItem, quantity: int,
-                 id: uuid.UUID = None):
+    def __init__(
+            self,
+            menu_item: MenuItem,
+            quantity: int,
+            id: uuid.UUID | None = None
+    ):
         super().__init__(id)
         self.menu_item = menu_item
         self.quantity = quantity
@@ -176,7 +205,11 @@ def start_mappers():
                 orm.order.c.total_price_value
             ),
             'table': relationship('Table'),
-            'order_items': relationship('OrderItem', backref='order')
+            'order_items': relationship(
+                'OrderItem',
+                backref='order',
+                collection_class=set
+            )
         }
     )
     orm.mapper_registry.map_imperatively(
@@ -185,15 +218,18 @@ def start_mappers():
         properties={
             'orders': relationship(
                 'Order',
-                backref='restaurant'
+                backref='restaurant',
+                collection_class=set
             ),
             'menu_items': relationship(
                 'MenuItem',
-                backref='restaurant'
+                backref='restaurant',
+                collection_class=set
             ),
             'tables': relationship(
                 'Table',
-                backref='restaurant'
+                backref='restaurant',
+                collection_class=set
             )
         }
     )

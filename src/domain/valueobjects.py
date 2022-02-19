@@ -27,7 +27,9 @@ def valueobject(cls):
     setattr(cls, '__post_init__', __post_init__)
     setattr(cls, '_get_validation_methods', _get_validation_methods)
 
-    return dataclass(cls, init=True, repr=True, order=True, eq=True)
+    return dataclass(
+        cls, init=True, repr=True, order=True, eq=True, unsafe_hash=True
+    )
 
 
 @valueobject

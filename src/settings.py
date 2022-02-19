@@ -10,3 +10,5 @@ class Settings(BaseSettings):
 
     api_host: str = 'localhost'
     api_port: int = 8000
+
+    map_models: bool = True

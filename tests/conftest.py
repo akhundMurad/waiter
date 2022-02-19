@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import clear_mappers, sessionmaker
 
-from adapters.orm import get_connection_string
+from adapters.orm import get_connection_string, mapper_registry
 from domain.models import start_mappers
 from domain.valueobjects import Price, Table
 from domain import models
@@ -40,7 +40,7 @@ def menu_item(restaurant, price) -> models.MenuItem:
 def empty_order(restaurant) -> models.Order:
     restaurant.add_table()
     return models.Order(
-        table=restaurant.tables[0],
+        table=restaurant.tables.pop(),
         restaurant=restaurant
     )
 
@@ -52,13 +52,15 @@ def settings() -> Settings:
         postgres_port=5432,
         postgres_password='waiter',
         postgres_name='waiter',
-        postgres_user='waiter'
+        postgres_user='waiter',
+        map_models=False
     )
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def pg_db(settings):
     engine = create_engine(get_connection_string(settings))
+    mapper_registry.metadata.create_all(engine)
     return engine
 
 
