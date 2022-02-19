@@ -4,14 +4,14 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import clear_mappers, sessionmaker
 
-from adapters.orm import mapper_registry
+from adapters.orm import get_connection_string
 from domain.models import start_mappers
 from domain.valueobjects import Price, Table
 from domain import models
-import settings
 from domain import repository
 from adapters.repository import sqlalchemy as sa_repo
 from domain.factory import EntityFactory, ValueObjectFactory
+from settings import Settings
 
 
 @pytest.fixture
@@ -51,10 +51,20 @@ def empty_order(restaurant):
     )
 
 
+@pytest.fixture
+def settings():
+    return Settings(
+        postgres_host='localhost',
+        postgres_port=5432,
+        postgres_password='waiter',
+        postgres_name='waiter',
+        postgres_user='waiter'
+    )
+
+
 @pytest.fixture(scope='session')
-def pg_db():
-    engine = create_engine(settings.get_postgres_uri())
-    mapper_registry.metadata.create_all(engine)
+def pg_db(settings):
+    engine = create_engine(get_connection_string(settings))
     return engine
 
 

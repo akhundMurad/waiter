@@ -17,9 +17,9 @@ class TestRestaurant:
         assert 1 in [table.index for table in restaurant.tables]
         assert 2 in [table.index for table in restaurant.tables]
 
-    def test_create_menu_item(self, restaurant):
+    def test_create_menu_item(self, restaurant, price):
         restaurant.create_menu_item(title='title', description='desc',
-                                    price=Decimal('2.0'))
+                                    price=price)
 
         assert len(restaurant.menu_items) == 1
 
