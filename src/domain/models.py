@@ -7,7 +7,6 @@ from sqlalchemy.orm import relationship, composite
 from domain import exceptions
 from domain.valueobjects import Price, Table, QRCode
 from .base import Entity
-from .factory import ValueObjectFactory, EntityFactory
 from adapters import orm
 
 logger = logging.getLogger(__name__)
@@ -31,8 +30,9 @@ class Restaurant(Entity):
 
     def add_table(self) -> 'Table':
         previous_table_index = self.get_previous_table_index()
-        table = ValueObjectFactory.build(
-            vo_cls=Table, index=previous_table_index + 1, restaurant=self
+        table = Table(
+            index=previous_table_index + 1,
+            restaurant=self
         )
         self.tables.append(table)
 
@@ -58,8 +58,7 @@ class Restaurant(Entity):
     def create_menu_item(self, title: str,
                          description: str,
                          price: Price) -> "MenuItem":
-        menu_item = EntityFactory.build(
-            entity_cls=MenuItem,
+        menu_item = MenuItem(
             title=title,
             description=description,
             price=price,
@@ -74,8 +73,7 @@ class Restaurant(Entity):
             raise exceptions.WrongTableForRestaurant(
                 'Table does not exist in this restaurant.'
             )
-        order = EntityFactory.build(
-            entity_cls=Order,
+        order = Order(
             table=table,
             restaurant=self
         )
