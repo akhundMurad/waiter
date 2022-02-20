@@ -6,8 +6,8 @@ from starlette.responses import JSONResponse
 
 from entrypoints.providers.uow import uow_provider
 from domain.restaurant import dto
-from servicelayer import handlers
-from servicelayer.unitofwork.abstract import AbstractUnitOfWork
+from domain.base.interface.unitofwork import UnitOfWorkInterface
+from servicelayer import services
 
 router = APIRouter(
     prefix='/menu-item',
@@ -22,9 +22,9 @@ router = APIRouter(
 def create_menu_item_to_restaurant(
         restaurant_id: uuid.UUID,
         menu_item: dto.MenuItemWrite,
-        uow: AbstractUnitOfWork = Depends(uow_provider)
+        uow: UnitOfWorkInterface = Depends(uow_provider)
 ) -> JSONResponse:
-    menu_item = handlers.create_menu_item_to_restaurant(
+    menu_item = services.create_menu_item_to_restaurant(
         restaurant_id=restaurant_id,
         title=menu_item.title,
         description=menu_item.description,

@@ -6,12 +6,12 @@ from domain.restaurant import dto
 from domain.restaurant.exceptions import InvalidRestaurantUUID, \
     WrongTableForRestaurant
 from domain.restaurant.models import Price
-from servicelayer.unitofwork.abstract import AbstractUnitOfWork
+from domain.base.interface.unitofwork import UnitOfWorkInterface
 
 
 def add_table_to_restaurant(
         restaurant_id: UUID,
-        uow: AbstractUnitOfWork
+        uow: UnitOfWorkInterface
 ) -> dto.TableRead:
     with uow:
         restaurant = uow.repository.get(restaurant_id)
@@ -31,7 +31,7 @@ def create_menu_item_to_restaurant(
         title: str,
         description: str,
         price: float,
-        uow: AbstractUnitOfWork
+        uow: UnitOfWorkInterface
 ) -> dto.MenuItemRead:
     with uow:
         restaurant = uow.repository.get(restaurant_id)
@@ -56,7 +56,7 @@ def make_order(
         restaurant_id: UUID,
         order_mapping: list[dict],
         table: int,
-        uow: AbstractUnitOfWork
+        uow: UnitOfWorkInterface
 ) -> dto.OrderRead:
     with uow:
         restaurant = uow.repository.get(restaurant_id)
