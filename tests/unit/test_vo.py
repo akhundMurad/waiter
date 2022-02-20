@@ -2,9 +2,9 @@ from decimal import Decimal
 
 import pytest
 
-from waiter.src.domain.exceptions import PriceValueIsLessThanZero, \
+from domain.restaurant.exceptions import PriceValueIsLessThanZero, \
     TableIndexIsLessThanZero
-from waiter.src.domain.valueobjects import Price, Table
+from domain.restaurant.models import Price, Table
 
 
 def test_raise_price_value_is_less_than_zero():

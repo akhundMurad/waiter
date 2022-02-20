@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from adapters.orm import get_sa_sessionmaker
-from domain.models import start_mappers
+from domain.restaurant.models import start_mappers
 from entrypoints.fastapi.routers import table, menuitem, order
 from entrypoints.providers.uow import uow_provider, get_uow
 from entrypoints.providers.settings import get_settings

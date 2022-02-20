@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
-from domain import models
+from domain.restaurant import models
 
 
 class AbstractRepository(ABC):
