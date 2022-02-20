@@ -8,7 +8,8 @@ import qrcode
 from sqlalchemy.orm import relationship, composite
 
 from domain.restaurant import exceptions
-from domain.base.models import Entity, valueobject
+from domain.base.models.entity import Entity
+from domain.base.models.valueobject import valueobject
 from adapters import orm
 
 logger = logging.getLogger(__name__)
