@@ -8,7 +8,7 @@ sys.path = ['', '..'] + sys.path[1:]
 
 from alembic import context
 from src.adapters import orm
-from src.settings import get_postgres_uri
+from src.settings import Settings
 
 config = context.config
 
@@ -30,7 +30,7 @@ def run_migrations_offline():
 
     """
     context.configure(
-        url=get_postgres_uri(),
+        url=orm.get_connection_string(Settings()),
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -48,7 +48,7 @@ def run_migrations_online():
 
     """
     configuration = config.get_section(config.config_ini_section)
-    configuration['sqlalchemy.url'] = get_postgres_uri()
+    configuration['sqlalchemy.url'] = orm.get_connection_string(Settings())
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",

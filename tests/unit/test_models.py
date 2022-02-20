@@ -2,9 +2,9 @@ from qrcode import QRCode as QRCodeObj
 
 import pytest
 
-from domain.exceptions import WrongTableForRestaurant, \
+from domain.restaurant.exceptions import WrongTableForRestaurant, \
     WrongMenuItemForRestaurant
-from domain.models import Restaurant, MenuItem
+from domain.restaurant.models import Restaurant, MenuItem
 
 
 class TestRestaurant:

@@ -2,8 +2,8 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from domain import models
-from domain.repository import AbstractRepository
+from domain.restaurant import models
+from domain.base.repository import AbstractRepository
 
 
 class RestaurantRepository(AbstractRepository):

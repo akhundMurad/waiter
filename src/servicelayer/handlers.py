@@ -2,9 +2,10 @@ import decimal
 import uuid
 from uuid import UUID
 
-from domain import dto
-from domain.exceptions import InvalidRestaurantUUID, WrongTableForRestaurant
-from domain.valueobjects import Price
+from domain.restaurant import dto
+from domain.restaurant.exceptions import InvalidRestaurantUUID, \
+    WrongTableForRestaurant
+from domain.restaurant.models import Price
 from servicelayer.unitofwork.abstract import AbstractUnitOfWork
 
 

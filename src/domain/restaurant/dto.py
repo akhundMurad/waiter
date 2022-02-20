@@ -1,4 +1,4 @@
-from pydantic import BaseModel as DTO
+from domain.base.dto import DTO
 
 
 class MenuItemWrite(DTO):

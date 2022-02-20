@@ -5,10 +5,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import clear_mappers, sessionmaker
 
 from adapters.orm import get_connection_string, mapper_registry
-from domain.models import start_mappers
-from domain.valueobjects import Price, Table
-from domain import models
-from domain import repository
+from domain.restaurant import models
+from domain.base import repository
 from adapters.repository import sqlalchemy as sa_repo
 from settings import Settings
 
@@ -19,13 +17,13 @@ def restaurant() -> models.Restaurant:
 
 
 @pytest.fixture
-def table(restaurant) -> Table:
-    return Table(index=1, restaurant=restaurant)
+def table(restaurant) -> models.Table:
+    return models.Table(index=1, restaurant=restaurant)
 
 
 @pytest.fixture
-def price() -> Price:
-    return Price(value=Decimal(2.0))
+def price() -> models.Price:
+    return models.Price(value=Decimal(2.0))
 
 
 @pytest.fixture
@@ -67,7 +65,7 @@ def pg_db(settings):
 @pytest.fixture
 def session_factory(pg_db):
     clear_mappers()
-    start_mappers()
+    models.start_mappers()
     yield sessionmaker(pg_db)
     clear_mappers()
 

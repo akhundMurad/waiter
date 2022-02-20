@@ -5,7 +5,7 @@ from fastapi.routing import APIRouter
 from starlette.responses import JSONResponse
 
 from entrypoints.providers.uow import uow_provider
-from domain import dto
+from domain.restaurant import dto
 from servicelayer import handlers
 from servicelayer.unitofwork.abstract import AbstractUnitOfWork
 

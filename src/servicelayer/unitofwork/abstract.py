@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 
-from domain import repository
+from domain.base.repository import AbstractRepository
 
 
 class AbstractUnitOfWork(ABC):
-    repository: repository.AbstractRepository
+    repository: AbstractRepository
 
     def __enter__(self) -> 'AbstractUnitOfWork':
         return self
