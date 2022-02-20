@@ -6,7 +6,7 @@ from domain.restaurant import dto
 from domain.restaurant.exceptions import InvalidRestaurantUUID, \
     WrongTableForRestaurant
 from domain.restaurant.models import Price
-from domain.base.interface.unitofwork import UnitOfWorkInterface
+from servicelayer.unitofwork.interface import UnitOfWorkInterface
 
 
 def add_table_to_restaurant(

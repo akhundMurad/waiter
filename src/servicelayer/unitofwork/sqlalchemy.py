@@ -2,7 +2,7 @@ import typing
 
 from sqlalchemy.orm.session import Session
 
-from domain.base.interface.unitofwork import UnitOfWorkInterface
+from servicelayer.unitofwork.interface import UnitOfWorkInterface
 from adapters.repository import sqlalchemy
 
 

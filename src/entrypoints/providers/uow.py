@@ -1,6 +1,6 @@
 from fastapi import Request
 
-from domain.base.interface.unitofwork import UnitOfWorkInterface
+from servicelayer.unitofwork.interface import UnitOfWorkInterface
 from servicelayer.unitofwork.sqlalchemy import RestaurantUnitOfWork
 
 

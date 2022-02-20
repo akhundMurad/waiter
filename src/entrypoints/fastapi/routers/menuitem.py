@@ -6,7 +6,7 @@ from starlette.responses import JSONResponse
 
 from entrypoints.providers.uow import uow_provider
 from domain.restaurant import dto
-from domain.base.interface.unitofwork import UnitOfWorkInterface
+from servicelayer.unitofwork.interface import UnitOfWorkInterface
 from servicelayer import services
 
 router = APIRouter(
