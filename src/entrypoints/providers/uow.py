@@ -1,10 +1,10 @@
 from fastapi import Request
 
-from servicelayer.unitofwork.abstract import AbstractUnitOfWork
+from servicelayer.unitofwork.interface import UnitOfWorkInterface
 from servicelayer.unitofwork.sqlalchemy import RestaurantUnitOfWork
 
 
-def uow_provider(request: Request) -> AbstractUnitOfWork:
+def uow_provider(request: Request) -> UnitOfWorkInterface:
     ...
 
 

@@ -6,7 +6,7 @@ from sqlalchemy.orm import clear_mappers, sessionmaker
 
 from adapters.orm import get_connection_string, mapper_registry
 from domain.restaurant import models
-from domain.base import repository
+from domain.base.interface.repository import RepositoryInterface
 from adapters.repository import sqlalchemy as sa_repo
 from settings import Settings
 
@@ -71,7 +71,7 @@ def session_factory(pg_db):
 
 
 @pytest.fixture
-def restaurant_repo(session_factory) -> repository.AbstractRepository:
+def restaurant_repo(session_factory) -> RepositoryInterface:
     session = session_factory()
     repo = sa_repo.RestaurantRepository(session)
     return repo

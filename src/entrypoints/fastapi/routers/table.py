@@ -4,10 +4,10 @@ from fastapi import status, Depends
 from fastapi.routing import APIRouter
 from starlette.responses import JSONResponse
 
+from servicelayer.unitofwork.interface import UnitOfWorkInterface
 from domain.restaurant import dto
 from entrypoints.providers.uow import uow_provider
-from servicelayer import handlers
-from servicelayer.unitofwork.abstract import AbstractUnitOfWork
+from servicelayer import services
 
 router = APIRouter(
     prefix='/table',
@@ -21,9 +21,9 @@ router = APIRouter(
 )
 def add_table_to_restaurant(
         restaurant_id: uuid.UUID,
-        uow: AbstractUnitOfWork = Depends(uow_provider)
+        uow: UnitOfWorkInterface = Depends(uow_provider)
 ) -> JSONResponse:
-    table = handlers.add_table_to_restaurant(
+    table = services.add_table_to_restaurant(
         restaurant_id=restaurant_id, uow=uow
     )
 
